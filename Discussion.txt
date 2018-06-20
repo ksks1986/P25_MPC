@@ -1,0 +1,12 @@
+1.Student discusses the reasoning behind the chosen N (timestep length) and 
+  dt (elapsed duration between timesteps) values. Additionally the student details the previous values tried.
+-> I choose N = 7 and  dt = 0.1 because good optimization range at 80mph.
+   If N is chosen bigger than 7, for example N = 10, car drives unstable.
+   Also, if N is chosen smaller than 7, for example N = 4, car drives unstable too.
+
+
+The student implements Model Predictive Control that handles a 100 millisecond latency. 
+Student provides details on how they deal with latency.
+-> Before MPC calculation, state values (cte, epsi, v)  are updated with guess value of latency.
+   For example, velocity v is updated by following equation, v = v + throttle * guess_latency.
+
