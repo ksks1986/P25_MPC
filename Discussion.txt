@@ -1,12 +1,67 @@
-1.Student discusses the reasoning behind the chosen N (timestep length) and 
-  dt (elapsed duration between timesteps) values. Additionally the student details the previous values tried.
+1. The Model
+->THe model is kinematic model.
+
+  The state is described below.
+  In the car coordinate, the initial state of px, py, psi equal to 0.0.
+  The cte is the value at the point of px(=0.0), so cte = polyeval(coeffs, 0.0).
+  The epsi is the arctan of the first derivative of polynomial at the point of px(=0.0).
+  So epsi = -atan(coeffs[1]).
+
+  The update equation is below.
+  The left side is the value at time = t+1 and right side is the value at time = t.
+
+  x1    = x0 + v0 * cos(psi0) * dt
+  y1    = y0 + v0 * sin(psi0) * dt
+  psi1  = psi0 + v0 * delta0 / Lf * dt
+  v1    = v0 + a0 * dt
+  cte1  = (f0 - y0) + (v0 * sin(epsi0) * dt)
+  epsi1 = (psi0 - psides0) + v0 * delta0 / Lf * dt
+
+where Lf is the length from front to CG.
+
+
+
+
+2.Timestep Length nd Elapsed Duration
 -> I choose N = 7 and  dt = 0.1 because good optimization range at 80mph.
    If N is chosen bigger than 7, for example N = 10, car drives unstable.
    Also, if N is chosen smaller than 7, for example N = 4, car drives unstable too.
 
+   Why smaller dt is better?
+  ->The dt determines resolution between each point.
+    The smaller dt is, the finer resolution is.
+    For example, car speed is 80mph and dt = 0.1, then the resolution is 80mph / 3600 * 0.1 sec = 0.0022 mile = 3.6 m.
+    This value is reasonable.
 
-The student implements Model Predictive Control that handles a 100 millisecond latency. 
-Student provides details on how they deal with latency.
+   Why larger N isn't always better?
+  ->The larger N is, the longer computational time.
+    But too small N leads to miss fit the curve.
+    So there is reasonable value of N.
+
+   How does time horizon (N*dt) affect the predicted path?
+  ->Time horizon affects the length of predicted path. 
+    For example, 80mph and N=7, dt = 0.1, the length of predicted path is about 24.9 meter.
+
+
+3.Polynomial Fitting and MPC Preprocessing
+->The waypoints are fitted by third degree polynomial.
+  Before fitting, the coordinate transformation below is done.
+
+-----
+Map coordinate and car coordinate have the below relationship.
+  xmap = xpos + xcar * cos(psi) - ycar * sin(psi)
+  ymap = ypos + xcar * sin(psi) + ycar * cos(psi)
+where xmap and ymap are the point in map coordinate, xpos and ypos are car position in map coordinate,
+xcar and ycar are the point in car cooridnate.
+
+These relationships lead to the point in car coorinate,
+
+  xcar = (xmap - xpos) *   cos(psi)  + (ymap - ypos) * sin(psi)
+  ycar = (xmap - xpos) * (-sin(psi)) + (ymap - ypos) * sin(psi)
+-----
+
+
+4.Model Predictive Control with Latency
 -> Before MPC calculation, state values (cte, epsi, v)  are updated with guess value of latency.
    For example, velocity v is updated by following equation, v = v + throttle * guess_latency.
 
